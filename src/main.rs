@@ -1,11 +1,14 @@
 use druid::{WindowDesc, AppLauncher, Widget, WidgetExt, Color, AppDelegate, DelegateCtx, Target, Command, Env, Handled};
-use druid::widget::{Flex, Button};
+use druid::widget::{Flex, Button, Container, Label};
 
 const LIGHTER_GREY: Color = Color::rgb8(242, 242, 242);
 
 use druid::{
     commands, platform_menus, Data, FileDialogOptions, LocalizedString, MenuDesc, MenuItem, SysMods, Lens
 };
+use std::path::Path;
+use std::ffi::OsStr;
+use std::sync::Arc;
 
 pub fn menus<T: Data>() -> MenuDesc<T> {
     let mut menu = MenuDesc::empty();
@@ -37,6 +40,22 @@ pub struct AppState {
     pub files: Vec<String>
 }
 
+impl AppState {
+    pub fn add_file(&mut self, path: Arc<Path>) {
+        match path.extension() {
+            None => {}
+            Some(result) => {
+                let ext = format!("{}", result.to_str().unwrap());
+                if ext == "jpg" || ext == "png" {
+                    log::info!("add file: {:?}", path.display());
+                    self.files.push(format!("{:?}", path.display()));
+
+                }
+            }
+        }
+    }
+}
+
 impl Data for AppState {
     fn same(&self, other: &Self) -> bool {
         self.title.same(&other.title)
@@ -50,12 +69,13 @@ impl Data for AppState {
 }
 
 fn make_ui() -> impl Widget<AppState> {
-    Flex::column()
-        .with_child(
-            Button::new("Convert").on_click(|ctx, data: &mut AppState, _env| {
-                // todo
-            })
-        )
+    let flex = Flex::column();
+    flex
+        // .with_child(
+        //     Button::new("Convert").on_click(|ctx, data: &mut AppState, _env| {
+        //         // todo
+        //     })
+        // )
         .background(LIGHTER_GREY)
 }
 
@@ -65,6 +85,7 @@ pub struct Delegate;
 impl AppDelegate<AppState> for Delegate {
     fn command<'a>(&mut self, ctx: &mut DelegateCtx<'a>, _target: Target, cmd: &Command, data: &mut AppState, _env: &Env) -> Handled {
         if let Some(info) = cmd.get(druid::commands::OPEN_FILE) {
+            data.add_file(Arc::from(info.path().to_owned()));
             return Handled::Yes
         }
 
@@ -76,8 +97,8 @@ pub fn main() {
     let title = "Hug8217";
 
     let main_window = WindowDesc::new(make_ui())
-        .window_size((1024., 768.))
-        .with_min_size((1024., 768.))
+        .window_size((512., 384.))
+        .with_min_size((512., 384.))
         .menu(menus())
         .title(title);
 
