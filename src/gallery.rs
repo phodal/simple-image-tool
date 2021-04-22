@@ -65,17 +65,11 @@ fn build_widget(state: &AppState) -> Box<dyn Widget<AppState>> {
         let path = Path::new(file);
         let png_data = ImageBuf::from_file(path).unwrap();
 
-        let mut img = Image::new(png_data).fill_mode(state.fill_strat);
-        let mut sized = SizedBox::new(img).fix_width(200.).fix_height(160.);
+        let img = Image::new(png_data).fill_mode(state.fill_strat);
+        let sized = SizedBox::new(img).fix_width(200.).fix_height(160.);
 
         col.add_child(sized);
     }
 
     col.boxed()
-    // let png_data = ImageBuf::from_data(include_bytes!("./assets/PicWithAlpha.png")).unwrap();
-    //
-    // let mut img = Image::new(png_data).fill_mode(state.fill_strat);
-    // let mut sized = SizedBox::new(img);
-    //
-    // sized.border(Color::grey(0.6), 2.0).center().boxed()
 }
