@@ -14,8 +14,10 @@ use crate::gallery::Gallery;
 use image::{GenericImageView, ImageFormat};
 use image::imageops::FilterType;
 use std::fs::File;
+use crate::message_box::MessageBox;
 
 pub mod gallery;
+pub mod message_box;
 
 fn make_menu(_: Option<WindowId>, _state: &AppState, _: &Env) -> Menu<AppState> {
     let mut menu = Menu::empty();
@@ -46,6 +48,7 @@ pub struct AppState {
     pub fill_strat: FillStrat,
     pub title: String,
     pub files: Vec<String>,
+    pub messages: Vec<String>,
     pub status: String,
 }
 
@@ -67,6 +70,10 @@ impl AppState {
         self.status = status.to_string();
     }
 
+    pub fn add_message(&mut self, msg: String) {
+        self.messages.push(msg);
+    }
+
     pub fn remove_file(&mut self, file: String) {
         let index = self.files.iter().position(|x| *x == file).unwrap();
         self.files.remove(index);
@@ -77,6 +84,8 @@ impl Data for AppState {
     fn same(&self, other: &Self) -> bool {
         self.title.same(&other.title)
             && self.files.len() == other.files.len()
+            // todo: add more message
+            && self.messages.len() == other.messages.len()
             && self
             .files
             .iter()
@@ -87,6 +96,7 @@ impl Data for AppState {
 
 pub const PROCESSING: Selector = Selector::new("simple.processing");
 pub const DONE: Selector = Selector::new("simple.done");
+pub const MESSAGE: Selector<String> = Selector::new("simple.message");
 
 fn make_ui() -> impl Widget<AppState> {
     let flex = Flex::column();
@@ -97,11 +107,13 @@ fn make_ui() -> impl Widget<AppState> {
                 ctx.submit_command(PROCESSING);
                 for file in data.files.clone() {
                     resize_image(file.clone());
+                    ctx.submit_command(MESSAGE.with(format!("done: {:?}", file.clone())));
                     &data.remove_file(file);
                 }
                 ctx.submit_command(DONE);
             })
         )
+        .with_child(MessageBox::new())
         .background(LIGHTER_GREY)
 }
 
@@ -139,6 +151,10 @@ impl AppDelegate<AppState> for Delegate {
             data.set_status("done");
             return Handled::Yes;
         }
+        if let Some(msg) = cmd.get(MESSAGE) {
+            data.add_message(msg.clone());
+            return Handled::Yes;
+        }
 
         return Handled::No;
     }
@@ -157,6 +173,7 @@ pub fn main() {
         fill_strat: FillStrat::Cover,
         title: "".to_string(),
         files: vec![],
+        messages: vec![],
         status: "".to_string()
     };
 
