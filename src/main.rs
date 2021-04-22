@@ -103,6 +103,15 @@ fn make_ui() -> impl Widget<AppState> {
     flex.with_child(Gallery::new())
         .with_default_spacer()
         .with_child(
+            Button::new("Open").on_click(|ctx, _data: &mut AppState, _env| {
+                ctx.submit_command(Command::new(
+                    druid::commands::SHOW_OPEN_PANEL,
+                    FileDialogOptions::new(),
+                    Target::Auto,
+                ))
+            })
+        )
+        .with_child(
             Button::new("Convert").on_click(|ctx, data: &mut AppState, _env| {
                 ctx.submit_command(PROCESSING);
                 for file in data.files.clone() {
@@ -121,7 +130,7 @@ fn resize_image(file: String) {
     let path = Path::new(&file);
     let img = image::open(&file).unwrap();
     log::info!("origin size: {}x{}", img.width(), img.height());
-    let resize_height: f32 = img.height()  as f32 / img.width() as f32 * 3072.0;
+    let resize_height: f32 = img.height() as f32 / img.width() as f32 * 3072.0;
     let resize_width = 3072;
     log::info!("resize size: {}x{}", resize_width, resize_height);
     let scale = img.resize(resize_width, resize_height as u32, FilterType::Nearest);
@@ -174,7 +183,7 @@ pub fn main() {
         title: "".to_string(),
         files: vec![],
         messages: vec![],
-        status: "".to_string()
+        status: "".to_string(),
     };
 
     AppLauncher::with_window(main_window)
