@@ -98,30 +98,35 @@ pub const PROCESSING: Selector = Selector::new("simple.processing");
 pub const DONE: Selector = Selector::new("simple.done");
 pub const MESSAGE: Selector<String> = Selector::new("simple.message");
 
+fn button() -> impl Widget<AppState> {
+    Flex::row()
+        .with_child(Button::new("Open").on_click(|ctx, _data: &mut AppState, _env| {
+            ctx.submit_command(Command::new(
+                druid::commands::SHOW_OPEN_PANEL,
+                FileDialogOptions::new(),
+                Target::Auto,
+            ))
+        }))
+        .with_default_spacer()
+        .with_child(
+        Button::new("Convert").on_click(|ctx, data: &mut AppState, _env| {
+            ctx.submit_command(PROCESSING);
+            for file in data.files.clone() {
+                resize_image(file.clone());
+                ctx.submit_command(MESSAGE.with(format!("done: {:?}", file.clone())));
+                &data.remove_file(file);
+            }
+            ctx.submit_command(DONE);
+        })
+    )
+}
+
 fn make_ui() -> impl Widget<AppState> {
     let flex = Flex::column();
     flex.with_child(Gallery::new())
         .with_default_spacer()
-        .with_child(
-            Button::new("Open").on_click(|ctx, _data: &mut AppState, _env| {
-                ctx.submit_command(Command::new(
-                    druid::commands::SHOW_OPEN_PANEL,
-                    FileDialogOptions::new(),
-                    Target::Auto,
-                ))
-            })
-        )
-        .with_child(
-            Button::new("Convert").on_click(|ctx, data: &mut AppState, _env| {
-                ctx.submit_command(PROCESSING);
-                for file in data.files.clone() {
-                    resize_image(file.clone());
-                    ctx.submit_command(MESSAGE.with(format!("done: {:?}", file.clone())));
-                    &data.remove_file(file);
-                }
-                ctx.submit_command(DONE);
-            })
-        )
+        .with_child(button())
+        .with_default_spacer()
         .with_child(MessageBox::new())
         .background(LIGHTER_GREY)
 }
