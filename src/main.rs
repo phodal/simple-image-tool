@@ -58,7 +58,7 @@ impl AppState {
             None => {}
             Some(result) => {
                 let ext = format!("{}", result.to_str().unwrap());
-                if ext == "jpg" || ext == "png" {
+                if ext == "jpg" || ext == "png" || ext == "jpeg" {
                     log::info!("add file: {:?}", path.display());
                     self.files.push(format!("{}", path.display()));
                 }
