@@ -1,6 +1,6 @@
 extern crate image;
 
-use druid::{WindowDesc, AppLauncher, Widget, WidgetExt, Color, AppDelegate, DelegateCtx, Target, Command, Env, Handled, Menu, WindowId};
+use druid::{WindowDesc, AppLauncher, Widget, WidgetExt, Color, AppDelegate, DelegateCtx, Target, Command, Env, Handled, Menu, WindowId, Selector};
 use druid::widget::{Flex, FillStrat, Button};
 
 const LIGHTER_GREY: Color = Color::rgb8(242, 242, 242);
@@ -46,6 +46,7 @@ pub struct AppState {
     pub fill_strat: FillStrat,
     pub title: String,
     pub files: Vec<String>,
+    pub status: String,
 }
 
 impl AppState {
@@ -61,6 +62,15 @@ impl AppState {
             }
         }
     }
+
+    pub fn set_status(&mut self, status: &str) {
+        self.status = status.to_string();
+    }
+
+    pub fn remove_file(&mut self, file: String) {
+        let index = self.files.iter().position(|x| *x == file).unwrap();
+        self.files.remove(index);
+    }
 }
 
 impl Data for AppState {
@@ -75,23 +85,29 @@ impl Data for AppState {
     }
 }
 
+pub const PROCESSING: Selector = Selector::new("simple.processing");
+pub const DONE: Selector = Selector::new("simple.done");
+
 fn make_ui() -> impl Widget<AppState> {
     let flex = Flex::column();
     flex.with_child(Gallery::new())
         .with_default_spacer()
         .with_child(
-            Button::new("Convert").on_click(|_ctx, data: &mut AppState, _env| {
-                for file in &data.files {
-                    resize_image(file);
+            Button::new("Convert").on_click(|ctx, data: &mut AppState, _env| {
+                ctx.submit_command(PROCESSING);
+                for file in data.files.clone() {
+                    resize_image(file.clone());
+                    &data.remove_file(file);
                 }
+                ctx.submit_command(DONE);
             })
         )
         .background(LIGHTER_GREY)
 }
 
-fn resize_image(file: &String) {
-    let path = Path::new(file);
-    let img = image::open(file).unwrap();
+fn resize_image(file: String) {
+    let path = Path::new(&file);
+    let img = image::open(&file).unwrap();
     log::info!("origin size: {}x{}", img.width(), img.height());
     let resize_height: f32 = img.height()  as f32 / img.width() as f32 * 3072.0;
     let resize_width = 3072;
@@ -115,6 +131,14 @@ impl AppDelegate<AppState> for Delegate {
             data.add_file(Arc::from(info.path().to_owned()));
             return Handled::Yes;
         }
+        if let Some(_) = cmd.get(PROCESSING) {
+            data.set_status("processing");
+            return Handled::Yes;
+        }
+        if let Some(_) = cmd.get(DONE) {
+            data.set_status("done");
+            return Handled::Yes;
+        }
 
         return Handled::No;
     }
@@ -133,6 +157,7 @@ pub fn main() {
         fill_strat: FillStrat::Cover,
         title: "".to_string(),
         files: vec![],
+        status: "".to_string()
     };
 
     AppLauncher::with_window(main_window)
