@@ -1,6 +1,6 @@
 use crate::AppState;
 use druid::{Widget, WidgetExt, LifeCycle, EventCtx, PaintCtx, BoxConstraints, LifeCycleCtx, Size, LayoutCtx, Event, Env, UpdateCtx, WidgetId, Data, Color};
-use druid::widget::{SizedBox, Image, Label, Flex};
+use druid::widget::{SizedBox, Label, Flex};
 
 pub struct Gallery {
     inner: Box<dyn Widget<AppState>>,
@@ -60,12 +60,6 @@ fn build_widget(state: &AppState) -> Box<dyn Widget<AppState>> {
     let mut col = Flex::column();
 
     for file in &state.files {
-        // let path = Path::new(file);
-        // let png_data = ImageBuf::from_file(path).unwrap();
-        //
-        // let img = Image::new(png_data).fill_mode(state.fill_strat);
-        // let sized = SizedBox::new(img).fix_width(200.).fix_height(160.);
-
         let label = Label::new(file.as_str()).with_text_color(Color::BLACK);
 
         col.add_child(label);

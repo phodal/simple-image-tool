@@ -1,5 +1,7 @@
+extern crate image;
+
 use druid::{WindowDesc, AppLauncher, Widget, WidgetExt, Color, AppDelegate, DelegateCtx, Target, Command, Env, Handled, Menu, WindowId};
-use druid::widget::{Flex, FillStrat};
+use druid::widget::{Flex, FillStrat, Button};
 
 const LIGHTER_GREY: Color = Color::rgb8(242, 242, 242);
 
@@ -9,6 +11,9 @@ use druid::{
 use std::path::Path;
 use std::sync::Arc;
 use crate::gallery::Gallery;
+use image::{GenericImageView, ImageFormat};
+use image::imageops::FilterType;
+use std::fs::File;
 
 pub mod gallery;
 
@@ -73,19 +78,39 @@ impl Data for AppState {
 fn make_ui() -> impl Widget<AppState> {
     let flex = Flex::column();
     flex.with_child(Gallery::new())
-        // .with_child(
-        //     Button::new("Convert").on_click(|ctx, data: &mut AppState, _env| {
-        //         // todo
-        //     })
-        // )
+        .with_default_spacer()
+        .with_child(
+            Button::new("Convert").on_click(|_ctx, data: &mut AppState, _env| {
+                for file in &data.files {
+                    resize_image(file);
+                }
+            })
+        )
         .background(LIGHTER_GREY)
+}
+
+fn resize_image(file: &String) {
+    let path = Path::new(file);
+    let img = image::open(file).unwrap();
+    log::info!("origin size: {}x{}", img.width(), img.height());
+    let resize_height: f32 = img.height()  as f32 / img.width() as f32 * 3072.0;
+    let resize_width = 3072;
+    log::info!("resize size: {}x{}", resize_width, resize_height);
+    let scale = img.resize(resize_width, resize_height as u32, FilterType::Nearest);
+
+    let parent = path.parent().unwrap();
+    let file_name = path.file_name().unwrap();
+    let prefix = parent.join(file_name);
+    let new_file_name = format!("{}-thumb.jpg", prefix.display());
+    let mut output = File::create(&new_file_name).unwrap();
+    scale.write_to(&mut output, ImageFormat::Jpeg).unwrap();
 }
 
 #[derive(Debug, Default)]
 pub struct Delegate;
 
 impl AppDelegate<AppState> for Delegate {
-    fn command<'a>(&mut self, ctx: &mut DelegateCtx<'a>, _target: Target, cmd: &Command, data: &mut AppState, _env: &Env) -> Handled {
+    fn command<'a>(&mut self, _ctx: &mut DelegateCtx<'a>, _target: Target, cmd: &Command, data: &mut AppState, _env: &Env) -> Handled {
         if let Some(info) = cmd.get(druid::commands::OPEN_FILE) {
             data.add_file(Arc::from(info.path().to_owned()));
             return Handled::Yes;

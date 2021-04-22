@@ -13,3 +13,4 @@ log = "0.4.8"
 
 piet-common = { version = "=0.4.1", features = ["png", "jpeg"] }
 
+image = "0.23.14"
