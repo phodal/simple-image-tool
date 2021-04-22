@@ -1,7 +1,8 @@
 use crate::AppState;
 use druid::{Widget, WidgetExt, LifeCycle, EventCtx, PaintCtx, BoxConstraints, LifeCycleCtx, Size, LayoutCtx, Event, Env, UpdateCtx, WidgetId, Data, Color};
-use druid::widget::{SizedBox, Image, Label};
+use druid::widget::{SizedBox, Image, Label, Flex};
 use druid::piet::ImageBuf;
+use std::path::Path;
 
 pub struct Gallery {
     inner: Box<dyn Widget<AppState>>,
@@ -58,10 +59,23 @@ impl Widget<AppState> for Gallery {
 }
 
 fn build_widget(state: &AppState) -> Box<dyn Widget<AppState>> {
-    let png_data = ImageBuf::from_data(include_bytes!("./assets/PicWithAlpha.png")).unwrap();
+    let mut col = Flex::column();
 
-    let mut img = Image::new(png_data).fill_mode(state.fill_strat);
-    let mut sized = SizedBox::new(img);
+    for file in &state.files {
+        let path = Path::new(file);
+        let png_data = ImageBuf::from_file(path).unwrap();
 
-    sized.border(Color::grey(0.6), 2.0).center().boxed()
+        let mut img = Image::new(png_data).fill_mode(state.fill_strat);
+        let mut sized = SizedBox::new(img).fix_width(200.).fix_height(160.);
+
+        col.add_child(sized);
+    }
+
+    col.boxed()
+    // let png_data = ImageBuf::from_data(include_bytes!("./assets/PicWithAlpha.png")).unwrap();
+    //
+    // let mut img = Image::new(png_data).fill_mode(state.fill_strat);
+    // let mut sized = SizedBox::new(img);
+    //
+    // sized.border(Color::grey(0.6), 2.0).center().boxed()
 }
