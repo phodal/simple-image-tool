@@ -123,6 +123,7 @@ fn button() -> impl Widget<AppState> {
                 Target::Auto,
             ))
         }))
+        .with_default_spacer()
         .with_child(Button::new("设置水印").on_click(|ctx, _data: &mut AppState, _env| {
             ctx.submit_command(WATERMARK);
             ctx.submit_command(Command::new(
