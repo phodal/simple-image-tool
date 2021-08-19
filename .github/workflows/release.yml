@@ -12,12 +12,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
-            artifact_name: simple-image-tool
-            asset_name: sit-linux-amd64
-          - os: windows-latest
-            artifact_name: simple-image-tool.exe
-            asset_name: sit-windows-amd64
           - os: macos-latest
             artifact_name: simple-image-tool
             asset_name: sit-macos-amd64
