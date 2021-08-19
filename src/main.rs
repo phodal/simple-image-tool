@@ -134,7 +134,7 @@ fn button() -> impl Widget<AppState> {
         }))
         .with_default_spacer()
         .with_child(
-            Button::new("Convert").on_click(|ctx, _data: &mut AppState, _env| {
+            Button::new("Convert").on_click(|ctx, data: &mut AppState, _env| {
                 ctx.submit_command(PROCESSING);
                 for file in data.files.clone() {
                     resize_image(file.clone(), &data.watermark);
