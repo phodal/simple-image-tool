@@ -55,10 +55,11 @@ pub struct AppState {
 
 impl AppState {
     pub fn add_file(&mut self, path: Arc<Path>) {
+        log::info!("add file: {}", path.clone().display());
         match path.extension() {
             None => {}
             Some(result) => {
-                let ext = format!("{}", result.to_str().unwrap());
+                let ext = format!("{}", result.to_str().unwrap()).to_lowercase();
                 if ext == "jpg" || ext == "png" || ext == "jpeg" {
                     log::info!("add file: {:?}", path.display());
                     self.files.push(format!("{}", path.display()));
