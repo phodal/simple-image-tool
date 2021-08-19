@@ -186,7 +186,6 @@ pub struct Delegate;
 impl AppDelegate<AppState> for Delegate {
     fn command<'a>(&mut self, ctx: &mut DelegateCtx<'a>, _target: Target, cmd: &Command, data: &mut AppState, _env: &Env) -> Handled {
         if let Some(info) = cmd.get(druid::commands::OPEN_FILE) {
-            println!("{:?}", data.status);
             if data.status == "watermark" {
                 let path = info.path().clone();
                 data.set_watermark(Arc::from(path.to_owned()));
