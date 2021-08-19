@@ -188,8 +188,9 @@ impl AppDelegate<AppState> for Delegate {
         if let Some(info) = cmd.get(druid::commands::OPEN_FILE) {
             println!("{:?}", data.status);
             if data.status == "watermark" {
-                data.set_watermark(Arc::from(info.path().to_owned()));
-                ctx.submit_command(MESSAGE.with(format!("watermark: {:?}", data.watermark.clone())));
+                let path = info.path().clone();
+                data.set_watermark(Arc::from(path.to_owned()));
+                ctx.submit_command(MESSAGE.with(format!("watermark: {:?}", path.display())));
                 return Handled::Yes;
             }
             data.add_file(Arc::from(info.path().to_owned()));
