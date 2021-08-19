@@ -60,7 +60,7 @@ impl AppState {
             None => {}
             Some(result) => {
                 let ext = format!("{}", result.to_str().unwrap()).to_lowercase();
-                if ext == "jpg" || ext == "png" || ext == "jpeg" {
+                if ext == "jpg" || ext == "png" || ext == "jpeg" || ext == "webp" || ext == "bmp" {
                     log::info!("add file: {:?}", path.display());
                     self.files.push(format!("{}", path.display()));
                 }
