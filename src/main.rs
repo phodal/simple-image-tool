@@ -98,12 +98,19 @@ fn make_ui() -> impl Widget<AppState> {
 
 fn resize_image(file: String, watermark: &str) {
     let path = Path::new(&file);
-    let img = image::open(&file).unwrap();
-    log::info!("origin size: {}x{}", img.width(), img.height());
-    let resize_height: f32 = img.height() as f32 / img.width() as f32 * 3072.0;
-    let resize_width = 3072;
-    log::info!("resize size: {}x{}", resize_width, resize_height);
-    let mut scale = img.resize(resize_width, resize_height as u32, FilterType::Nearest);
+    let origin_image = image::open(&file).unwrap();
+    log::info!("origin size: {}x{}", origin_image.width(), origin_image.height());
+
+    let mut scale;
+    if origin_image.width() < 3072 || origin_image.height() <  3072 {
+        scale = origin_image;
+        log::info!("image width or height < 3072");
+    } else {
+        let resize_height: f32 = origin_image.height() as f32 / origin_image.width() as f32 * 3072.0;
+        let resize_width = 3072;
+        log::info!("resize size: {}x{}", resize_width, resize_height);
+        scale = origin_image.resize(resize_width, resize_height as u32, FilterType::Nearest);
+    }
 
     let parent = path.parent().unwrap();
     let file_name = path.file_name().unwrap();
