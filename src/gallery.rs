@@ -1,4 +1,4 @@
-use crate::AppState;
+use crate::app_state::AppState;
 use druid::{Widget, WidgetExt, LifeCycle, EventCtx, PaintCtx, BoxConstraints, LifeCycleCtx, Size, LayoutCtx, Event, Env, UpdateCtx, WidgetId, Data, Color};
 use druid::widget::{SizedBox, Label, Flex};
 

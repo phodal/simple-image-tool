@@ -1,23 +1,27 @@
 extern crate image;
 
-use druid::{WindowDesc, AppLauncher, Widget, WidgetExt, Color, AppDelegate, DelegateCtx, Target, Command, Env, Handled, Menu, WindowId, Selector};
-use druid::widget::{Flex, FillStrat, Button};
+use std::fs::File;
+use std::path::Path;
+use std::sync::Arc;
+
+use druid::{AppDelegate, AppLauncher, Color, Command, DelegateCtx, Env, Handled, Menu, Selector, Target, Widget, WidgetExt, WindowDesc, WindowId};
+use druid::{
+    commands, Data, FileDialogOptions, LocalizedString, MenuItem, platform_menus, SysMods,
+};
+use druid::widget::{Button, FillStrat, Flex};
+use image::{GenericImageView, ImageFormat};
+use image::imageops::FilterType;
+
+use app_state::AppState;
+
+use crate::gallery::Gallery;
+use crate::message_box::MessageBox;
 
 const LIGHTER_GREY: Color = Color::rgb8(242, 242, 242);
 
-use druid::{
-    commands, platform_menus, Data, FileDialogOptions, LocalizedString, MenuItem, SysMods, Lens,
-};
-use std::path::Path;
-use std::sync::Arc;
-use crate::gallery::Gallery;
-use image::{GenericImageView, ImageFormat};
-use image::imageops::FilterType;
-use std::fs::File;
-use crate::message_box::MessageBox;
-
 pub mod gallery;
 pub mod message_box;
+pub mod app_state;
 
 fn make_menu(_: Option<WindowId>, _state: &AppState, _: &Env) -> Menu<AppState> {
     let mut menu = Menu::empty();
@@ -41,71 +45,6 @@ fn file_menu<T: Data>() -> Menu<T> {
         )
         .separator()
         .entry(platform_menus::mac::file::close())
-}
-
-#[derive(Clone, Lens)]
-pub struct AppState {
-    pub fill_strat: FillStrat,
-    pub title: String,
-    pub files: Vec<String>,
-    pub watermark: String,
-    pub messages: Vec<String>,
-    pub status: String,
-}
-
-impl AppState {
-    pub fn add_file(&mut self, path: Arc<Path>) {
-        log::info!("add file: {}", path.clone().display());
-        match path.extension() {
-            None => {}
-            Some(result) => {
-                let ext = format!("{}", result.to_str().unwrap()).to_lowercase();
-                if ext == "jpg" || ext == "png" || ext == "jpeg" || ext == "webp" || ext == "bmp" {
-                    log::info!("add file: {:?}", path.display());
-                    self.files.push(format!("{}", path.display()));
-                }
-            }
-        }
-    }
-
-    pub fn set_watermark(&mut self, path: Arc<Path>) {
-        match path.extension() {
-            None => {}
-            Some(result) => {
-                let ext = format!("{}", result.to_str().unwrap());
-                if ext == "png" {
-                    self.watermark = format!("{}", path.display());
-                }
-            }
-        }
-    }
-
-    pub fn set_status(&mut self, status: &str) {
-        self.status = status.to_string();
-    }
-
-    pub fn add_message(&mut self, msg: String) {
-        self.messages.push(msg);
-    }
-
-    pub fn remove_file(&mut self, file: String) {
-        let index = self.files.iter().position(|x| *x == file).unwrap();
-        self.files.remove(index);
-    }
-}
-
-impl Data for AppState {
-    fn same(&self, other: &Self) -> bool {
-        self.title.same(&other.title)
-            && self.files.len() == other.files.len()
-            // todo: add more message
-            && self.messages.len() == other.messages.len()
-            && self
-            .files
-            .iter()
-            .zip(other.files.iter())
-            .all(|(a, b)| a.same(b))
-    }
 }
 
 pub const WATERMARK: Selector = Selector::new("simple.watermark");
