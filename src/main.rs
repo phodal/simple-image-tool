@@ -15,10 +15,12 @@ use image::imageops::FilterType;
 use app_state::AppState;
 use components::gallery::Gallery;
 use components::message_box::MessageBox;
+use sit_delegate::{DONE, MESSAGE, OPENING, PROCESSING, SitDelegate, WATERMARK};
 
 const LIGHTER_GREY: Color = Color::rgb8(242, 242, 242);
 
 pub mod app_state;
+pub mod sit_delegate;
 pub mod components;
 
 fn make_menu(_: Option<WindowId>, _state: &AppState, _: &Env) -> Menu<AppState> {
@@ -44,12 +46,6 @@ fn file_menu<T: Data>() -> Menu<T> {
         .separator()
         .entry(platform_menus::mac::file::close())
 }
-
-pub const WATERMARK: Selector = Selector::new("simple.watermark");
-pub const PROCESSING: Selector = Selector::new("simple.processing");
-pub const OPENING: Selector = Selector::new("simple.opening");
-pub const DONE: Selector = Selector::new("simple.done");
-pub const MESSAGE: Selector<String> = Selector::new("simple.message");
 
 fn button() -> impl Widget<AppState> {
     Flex::row()
@@ -130,46 +126,6 @@ fn thumb_output_path(path: &Path) -> String {
     new_file_name
 }
 
-#[derive(Debug, Default)]
-pub struct Delegate;
-
-impl AppDelegate<AppState> for Delegate {
-    fn command<'a>(&mut self, ctx: &mut DelegateCtx<'a>, _target: Target, cmd: &Command, data: &mut AppState, _env: &Env) -> Handled {
-        if let Some(info) = cmd.get(druid::commands::OPEN_FILE) {
-            if data.status == "watermark" {
-                let path = info.path().clone();
-                data.set_watermark(Arc::from(path.to_owned()));
-                ctx.submit_command(MESSAGE.with(format!("watermark: {:?}", path.display())));
-                return Handled::Yes;
-            }
-            data.add_file(Arc::from(info.path().to_owned()));
-            return Handled::Yes;
-        }
-        if let Some(_) = cmd.get(PROCESSING) {
-            data.set_status("processing");
-            return Handled::Yes;
-        }
-        if let Some(_) = cmd.get(OPENING) {
-            data.set_status("opening");
-            return Handled::Yes;
-        }
-        if let Some(_) = cmd.get(WATERMARK) {
-            data.set_status("watermark");
-            return Handled::Yes;
-        }
-        if let Some(_) = cmd.get(DONE) {
-            data.set_status("done");
-            return Handled::Yes;
-        }
-        if let Some(msg) = cmd.get(MESSAGE) {
-            data.add_message(msg.clone());
-            return Handled::Yes;
-        }
-
-        return Handled::No;
-    }
-}
-
 pub fn main() {
     let title = "Hug8217";
 
@@ -189,7 +145,7 @@ pub fn main() {
     };
 
     AppLauncher::with_window(main_window)
-        .delegate(Delegate::default())
+        .delegate(SitDelegate::default())
         .log_to_console()
         .launch(init_state)
         .expect("Failed to launch application");
