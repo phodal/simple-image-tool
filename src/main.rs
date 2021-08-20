@@ -13,15 +13,13 @@ use image::{GenericImageView, ImageFormat};
 use image::imageops::FilterType;
 
 use app_state::AppState;
-
-use crate::gallery::Gallery;
-use crate::message_box::MessageBox;
+use components::gallery::Gallery;
+use components::message_box::MessageBox;
 
 const LIGHTER_GREY: Color = Color::rgb8(242, 242, 242);
 
-pub mod gallery;
-pub mod message_box;
 pub mod app_state;
+pub mod components;
 
 fn make_menu(_: Option<WindowId>, _state: &AppState, _: &Env) -> Menu<AppState> {
     let mut menu = Menu::empty();
