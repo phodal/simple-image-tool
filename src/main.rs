@@ -112,10 +112,7 @@ fn resize_image(file: String, watermark: &str) {
         scale = origin_image.resize(resize_width, resize_height as u32, FilterType::Nearest);
     }
 
-    let parent = path.parent().unwrap();
-    let file_name = path.file_name().unwrap();
-    let prefix = parent.join(file_name);
-    let new_file_name = format!("{}-thumb.jpg", prefix.display());
+    let new_file_name = thumb_output_path(path);
     let mut output = File::create(&new_file_name).unwrap();
 
     if watermark != "" {
@@ -125,6 +122,14 @@ fn resize_image(file: String, watermark: &str) {
     } else {
         scale.write_to(&mut output, ImageFormat::Jpeg).unwrap();
     }
+}
+
+fn thumb_output_path(path: &Path) -> String {
+    let parent = path.parent().unwrap();
+    let file_name = path.file_name().unwrap();
+    let prefix = parent.join(file_name);
+    let new_file_name = format!("{}-thumb.jpg", prefix.display());
+    new_file_name
 }
 
 #[derive(Debug, Default)]
