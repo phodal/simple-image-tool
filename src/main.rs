@@ -72,7 +72,7 @@ pub fn main() {
         files: vec![],
         watermark: "".to_string(),
         messages: vec![],
-        status: "".to_string(),
+        process_type: "".to_string(),
     };
 
     AppLauncher::with_window(main_window)

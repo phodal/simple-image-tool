@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::sync::Arc;
 
-use druid::{Data, EventCtx, Lens};
+use druid::{Data, Lens, EventCtx};
 use druid::widget::FillStrat;
 
 use crate::{sit_image};
@@ -14,7 +14,7 @@ pub struct AppState {
     pub files: Vec<String>,
     pub watermark: String,
     pub messages: Vec<String>,
-    pub status: String,
+    pub process_type: String,
 }
 
 impl AppState {
@@ -44,8 +44,8 @@ impl AppState {
         }
     }
 
-    pub fn set_status(&mut self, status: &str) {
-        self.status = status.to_string();
+    pub fn set_process_type(&mut self, process_type: &str) {
+        self.process_type = process_type.to_string();
     }
 
     pub fn add_message(&mut self, msg: String) {
