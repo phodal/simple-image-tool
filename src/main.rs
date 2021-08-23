@@ -15,6 +15,7 @@ pub mod app_state;
 pub mod sit_delegate;
 pub mod components;
 pub mod sit_menu;
+pub mod sit_image;
 
 fn button() -> impl Widget<AppState> {
     Flex::row()
