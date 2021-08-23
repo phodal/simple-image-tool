@@ -2,9 +2,8 @@ extern crate image;
 
 use std::fs::File;
 use std::path::Path;
-use std::sync::Arc;
 
-use druid::{AppDelegate, AppLauncher, Color, Command, DelegateCtx, Env, Handled, Menu, Selector, Target, Widget, WidgetExt, WindowDesc, WindowId};
+use druid::{AppLauncher, Color, Command, Env, Menu, Target, Widget, WidgetExt, WindowDesc, WindowId};
 use druid::{
     commands, Data, FileDialogOptions, LocalizedString, MenuItem, platform_menus, SysMods,
 };
@@ -90,18 +89,20 @@ fn make_ui() -> impl Widget<AppState> {
         .background(LIGHTER_GREY)
 }
 
+const IMAGE_MAX_WIDTH: u32 = 3072;
+
 fn resize_image(file: String, watermark: &str) {
     let path = Path::new(&file);
     let origin_image = image::open(&file).unwrap();
     log::info!("origin size: {}x{}", origin_image.width(), origin_image.height());
 
     let mut scale;
-    if origin_image.width() < 3072 || origin_image.height() <  3072 {
+    if origin_image.width() < IMAGE_MAX_WIDTH || origin_image.height() < IMAGE_MAX_WIDTH {
         scale = origin_image;
-        log::info!("image width or height < 3072");
+        log::info!("image width or height < {:?}", IMAGE_MAX_WIDTH);
     } else {
         let resize_height: f32 = origin_image.height() as f32 / origin_image.width() as f32 * 3072.0;
-        let resize_width = 3072;
+        let resize_width = IMAGE_MAX_WIDTH;
         log::info!("resize size: {}x{}", resize_width, resize_height);
         scale = origin_image.resize(resize_width, resize_height as u32, FilterType::Nearest);
     }
