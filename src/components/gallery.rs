@@ -1,6 +1,7 @@
 use crate::app_state::AppState;
-use druid::{Widget, WidgetExt, LifeCycle, EventCtx, PaintCtx, BoxConstraints, LifeCycleCtx, Size, LayoutCtx, Event, Env, UpdateCtx, WidgetId, Data, Color};
-use druid::widget::{SizedBox, Label, Flex};
+use druid::{Widget, WidgetExt, LifeCycle, EventCtx, PaintCtx, BoxConstraints, LifeCycleCtx, Size, LayoutCtx, Event, Env, UpdateCtx, WidgetId, Data, ImageBuf};
+use druid::widget::{SizedBox, Flex, Image};
+use piet_common::InterpolationMode;
 
 pub struct Gallery {
     inner: Box<dyn Widget<AppState>>,
@@ -60,9 +61,16 @@ fn build_widget(state: &AppState) -> Box<dyn Widget<AppState>> {
     let mut col = Flex::column();
 
     for file in &state.files {
-        let label = Label::new(file.as_str()).with_text_color(Color::BLACK);
+        let png_data = ImageBuf::from_file(file).unwrap();
 
-        col.add_child(label);
+        let mut img = Image::new(png_data).fill_mode(state.fill_strat);
+        img.set_interpolation_mode(InterpolationMode::Bilinear);
+
+        let mut sized: SizedBox<AppState> = SizedBox::new(img);
+        sized = sized.fix_width(200.0);
+        sized = sized.fix_height(100.0);
+
+        col.add_child(sized);
     }
 
     col.boxed()

@@ -17,7 +17,7 @@ pub mod components;
 pub mod sit_menu;
 pub mod sit_image;
 
-fn button() -> impl Widget<AppState> {
+fn buttons() -> impl Widget<AppState> {
     Flex::row()
         .with_child(Button::new("打开文件").on_click(|ctx, _data: &mut AppState, _env| {
             ctx.submit_command(OPENING);
@@ -48,11 +48,12 @@ fn button() -> impl Widget<AppState> {
 
 fn make_ui() -> impl Widget<AppState> {
     let flex = Flex::column();
-    flex.with_child(Gallery::new())
-        .with_default_spacer()
-        .with_child(button())
+    flex.with_default_spacer()
+        .with_child(buttons())
         .with_default_spacer()
         .with_child(MessageBox::new())
+        .with_child(Gallery::new())
+        .with_default_spacer()
         .background(LIGHTER_GREY)
 }
 
@@ -62,8 +63,6 @@ pub fn main() {
     let title = "Hug8217";
 
     let main_window = WindowDesc::new(make_ui())
-        .window_size((512., 384.))
-        .with_min_size((512., 384.))
         .menu(sit_menu::make_menu)
         .title(title);
 
