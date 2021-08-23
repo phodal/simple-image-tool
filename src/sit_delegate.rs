@@ -17,20 +17,25 @@ pub struct SitDelegate;
 impl AppDelegate<AppState> for SitDelegate {
     fn command<'a>(&mut self, ctx: &mut DelegateCtx<'a>, _target: Target, cmd: &Command, data: &mut AppState, _env: &Env) -> Handled {
         if let Some(info) = cmd.get(druid::commands::OPEN_FILE) {
-            if data.process_type == "watermark" {
-                let path = info.path().clone();
-                data.set_watermark(Arc::from(path.to_owned()));
-                ctx.submit_command(MESSAGE.with(format!("watermark: {:?}", path.display())));
-                return Handled::Yes;
+            let file_arc = Arc::from(info.path().to_owned());
+
+            match data.process_type.as_str() {
+                "watermark" => {
+                    ctx.submit_command(MESSAGE.with(format!("watermark: {:?}", info.path().display())));
+                    data.set_watermark(file_arc);
+                }
+                _ => {
+                    data.add_file(file_arc);
+                }
             }
 
-            data.add_file(Arc::from(info.path().to_owned()));
             return Handled::Yes;
         }
         if let Some(_) = cmd.get(CONVERT) {
             return Handled::Yes;
         }
         if let Some(_) = cmd.get(OPENING) {
+            data.set_process_type("");
             return Handled::Yes;
         }
         if let Some(_) = cmd.get(WATERMARK) {
