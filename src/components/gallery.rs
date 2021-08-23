@@ -1,7 +1,8 @@
-use crate::app_state::AppState;
-use druid::{Widget, WidgetExt, LifeCycle, EventCtx, PaintCtx, BoxConstraints, LifeCycleCtx, Size, LayoutCtx, Event, Env, UpdateCtx, WidgetId, Data, ImageBuf};
-use druid::widget::{SizedBox, Flex, Image};
+use druid::{BoxConstraints, Data, Env, Event, EventCtx, ImageBuf, LayoutCtx, LifeCycle, LifeCycleCtx, PaintCtx, Size, UpdateCtx, Widget, WidgetExt, WidgetId};
+use druid::widget::{Flex, Image, Scroll, SizedBox};
 use piet_common::InterpolationMode;
+
+use crate::app_state::AppState;
 
 pub struct Gallery {
     inner: Box<dyn Widget<AppState>>,
@@ -58,7 +59,7 @@ impl Widget<AppState> for Gallery {
 }
 
 fn build_widget(state: &AppState) -> Box<dyn Widget<AppState>> {
-    let mut col = Flex::column();
+    let mut col = Flex::row();
 
     for file in &state.files {
         let png_data = ImageBuf::from_file(file).unwrap();
@@ -67,11 +68,12 @@ fn build_widget(state: &AppState) -> Box<dyn Widget<AppState>> {
         img.set_interpolation_mode(InterpolationMode::Bilinear);
 
         let mut sized: SizedBox<AppState> = SizedBox::new(img);
-        sized = sized.fix_width(200.0);
-        sized = sized.fix_height(100.0);
+        sized = sized.fix_width(307.2);
+        sized = sized.fix_height(192.0);
 
         col.add_child(sized);
+        col.add_default_spacer();
     }
 
-    col.boxed()
+    Scroll::new(col).boxed()
 }
