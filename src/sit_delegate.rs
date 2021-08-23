@@ -4,6 +4,12 @@ use druid::{AppDelegate, Command, DelegateCtx, Env, Handled, Selector, Target};
 
 use crate::app_state::AppState;
 
+pub const WATERMARK: Selector = Selector::new("simple.watermark");
+pub const PROCESSING: Selector = Selector::new("simple.processing");
+pub const OPENING: Selector = Selector::new("simple.opening");
+pub const DONE: Selector = Selector::new("simple.done");
+pub const MESSAGE: Selector<String> = Selector::new("simple.message");
+
 #[derive(Debug, Default)]
 pub struct SitDelegate;
 
@@ -43,9 +49,3 @@ impl AppDelegate<AppState> for SitDelegate {
         return Handled::No;
     }
 }
-
-pub const WATERMARK: Selector = Selector::new("simple.watermark");
-pub const PROCESSING: Selector = Selector::new("simple.processing");
-pub const OPENING: Selector = Selector::new("simple.opening");
-pub const DONE: Selector = Selector::new("simple.done");
-pub const MESSAGE: Selector<String> = Selector::new("simple.message");
