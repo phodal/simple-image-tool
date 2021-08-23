@@ -3,9 +3,9 @@ extern crate image;
 use std::fs::File;
 use std::path::Path;
 
-use druid::{AppLauncher, Color, Command, Env, Menu, Target, Widget, WidgetExt, WindowDesc, WindowId};
+use druid::{AppLauncher, Color, Command, Target, Widget, WidgetExt, WindowDesc};
 use druid::{
-    commands, Data, FileDialogOptions, LocalizedString, MenuItem, platform_menus, SysMods,
+    FileDialogOptions
 };
 use druid::widget::{Button, FillStrat, Flex};
 use image::{GenericImageView, ImageFormat};
@@ -21,30 +21,7 @@ const LIGHTER_GREY: Color = Color::rgb8(242, 242, 242);
 pub mod app_state;
 pub mod sit_delegate;
 pub mod components;
-
-fn make_menu(_: Option<WindowId>, _state: &AppState, _: &Env) -> Menu<AppState> {
-    let mut menu = Menu::empty();
-    #[cfg(target_os = "macos")]
-        {
-            menu = menu.entry(platform_menus::mac::application::default());
-        }
-
-    menu.entry(file_menu())
-}
-
-fn file_menu<T: Data>() -> Menu<T> {
-    Menu::new(LocalizedString::new("common-menu-file-menu"))
-        .entry(platform_menus::mac::file::new_file())
-        .entry(
-            MenuItem::new(
-                LocalizedString::new("common-menu-file-open"),
-            )
-                .command(commands::SHOW_OPEN_PANEL.with(FileDialogOptions::new().multi_selection()))
-                .hotkey(SysMods::Cmd, "o"),
-        )
-        .separator()
-        .entry(platform_menus::mac::file::close())
-}
+pub mod sit_menu;
 
 fn button() -> impl Widget<AppState> {
     Flex::row()
@@ -133,7 +110,7 @@ pub fn main() {
     let main_window = WindowDesc::new(make_ui())
         .window_size((512., 384.))
         .with_min_size((512., 384.))
-        .menu(make_menu)
+        .menu(sit_menu::make_menu)
         .title(title);
 
     let init_state = AppState {
